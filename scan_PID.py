@@ -40,7 +40,7 @@ def scan_callback(msg):
 	b_min = min(a)
     	print(b_min)
 
-	if (f_min <= 0.7):
+	if (f_min <= 0.7):							#safety program for moving forward
 		current_point = f_min
 		safety.data = 2
 		if current_point != des_point:
@@ -48,7 +48,7 @@ def scan_callback(msg):
 
 			msg1.throttle = throttle
 			pub_manual_drive.publish(msg1)
-	elif (b_min <= 0.7):
+	elif (b_min <= 0.7):							#safety program for moving backward
 		current_point = b_min
 		safety.data = 1
 		if current_point != des_point:
@@ -69,15 +69,15 @@ def drive_callback(data):
 	pub_manual_drive = rospy.Publisher('manual_drive', ServoCtrlMsg, queue_size = 10)
 	msg = ServoCtrlMsg()
 	
-	if 	((data.throttle > 0) and (safety.data == 2)): 		#safety program for moving forward
+	if 	((data.throttle > 0) and (safety.data == 2)): 		#Only move backward when obstacles in front of the vehicle
 		msg.throttle = data.throttle
 		msg.angle = data.angle
 		pub_manual_drive.publish(msg)
-	elif ((data.throttle < 0) and (safety.data == 1)): 	#safety program for moving backward
+	elif ((data.throttle < 0) and (safety.data == 1)): 		#Only move forward when obstacles behind the vehicle
 		msg.throttle = data.throttle
 		msg.angle = data.angle
 		pub_manual_drive.publish(msg)
-	elif safety.data == 0:							#normal moving command
+	elif safety.data == 0:						
 		msg.throttle = data.throttle
 		msg.angle = data.angle
 		pub_manual_drive.publish(msg)
